@@ -19,7 +19,7 @@ FILTERING_KEYWORDS = ('title', 'genres', 'director', 'writer', 'cast', 'language
 SWEAR_KEYWORDS = ('fuck', 'stfu', 'idiot', 'noob', 'faggot','bullshit','bs','fck','fcker','fucker','bastard', 'cunt','kys')
 SWEARING_RESPONSES = ["That was not cool...", "Wow, ur such a badass....", "Well, im not used to this kind of language", "Please, dont swear while im on this channel", "Yo, there might be some kids running around", "WOW. Ur such a man. That was a cool word... *sarcasm*"]
 GREETING_KEYWORDS = ("hello",  "hi", "greetings", "sup", "hey", "sup dog", "yo", "hey bro", "hey robot", "good morning", "good afternoon", "good evening", "morning", "hey ya", "hey there", "hello chatbot", "hey man", "wazzup?", "sup?", "yo!", "howdy-doody!", "hey there", "hey mister robot", "hey mr robot", "hello mate", "hey boo", "aloha", "bonjour", "sup robot" )
-GREETING_RESPONSES = ["'sup bro :smile:", "hey :smile:", "*nods*", "hello", "hi", "nice to hear from you", "hello human", "hey human", "Greetings from the smartest chatbot",  ]#this one had to be put into db too.
+GREETING_RESPONSES = ["'Sup bro :smile:", "Hey :smile:", "*nods*", "Hello", "Hi", "Nice to hear from you", "Hello human", "Hey human", "Greetings from the smartest chatbot",  ]#this one had to be put into db too.
 def check_for_greeting(sentence): 
 	wordList = re.sub("[^\w]", " ",  sentence).split()
 	for word in wordList:
@@ -29,7 +29,7 @@ def check_for_greeting(sentence):
 			
 QUESTION_KEYWORDS = ('how','are','you','good','alright','hows','it','going','ok')
 QUESTION_RESPONSES = ["I'm good, thanks for asking", "Not so bad", "Pretty good", "So far so good", "Honestly, life is going better that ever", "I've been struggling for a while, but now im good"]
-IDK_RESPONSES = ["I did'nt understood your question, can you please give me a more simple one? Im a workpiece of a first year students. Dont exepect too much from me.","What is that?", "Ok, next question...","IM A ROBOT *beep* *bop* *boop* CANT UNDERSTAND HOOMANS","What language is this? Definately not ROBOTish"]
+IDK_RESPONSES = ["I didn't understood your question, can you please give me a more simple one? Im a workpiece of a first year students. Dont exepect too much from me.","What is that?", "Ok, next question...","IM A ROBOT *beep* *bop* *boop* CANT UNDERSTAND HOOMANS","What language is this? Definately not ROBOTish"]
 def check_for_questions(sentence): #also, this function has to be called from different file(database of all Q/A)
 	wordList = re.sub("[^\w]", " ",  sentence).split()
 	returnMess = random.choice(IDK_RESPONSES)
@@ -163,7 +163,7 @@ async def on_message(message):
 			print(message.content)
 			moviex = mv.search_movie(message.content)[0]
 			mx = mv.get_movie(moviex.movieID)
-			response =  ("Sorry,Is this the movie you have asked about?" + str(mx))
+			response =  ("Sorry, Is this the movie you have asked about?" + str(mx))
 		elif message.content in FILTERING_KEYWORDS:
 			print("FILTERING")
 			keyword = filter_on_message(memory[-1])
