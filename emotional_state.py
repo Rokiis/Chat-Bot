@@ -19,4 +19,6 @@ def check_for_happy(sentence):
             returnMess = random.choice(HAPPY_RESPONSES)
             return returnMess
         
-return None 
+        
+        
+        return None
