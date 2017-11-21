@@ -13,9 +13,10 @@ memory = []
 
 AGGREE_KEYOWORDS = ('yes','y','yeah')
 FILTERING_KEYWORDS = ('summary','release','date','director')
-#KEYWORD FILTERING
-GREETING_KEYWORDS = ('hello',  'hi', 'greetings', 'sup','hey')
-GREETING_RESPONSES = ["'sup bro",":kappa:" "hey", "*nods*", "hello", "hi","nice to hear from you"]
+SWEAR_KEYWORDS = ('fuck', 'stfu', 'idiot', 'noob', 'faggot','bullshit','bs','fck','fcker','fucker','bastard', 'cunt')
+SWEARING_RESPONSES = ["That was not cool...", "Wow, ur such a badass....", "Well, im not used to this kind of language", "Please, dont swear while im on this channel", "Yo, there might be some kids running around", "WOW. Ur such a man. That was a cool word... *sarcasm*"]
+GREETING_KEYWORDS = ("hello",  "hi", "greetings", "sup", "hey", "sup dog", "yo", "hey bro", "hey robot", "good morning", "good afternoon", "good evening", "morning", "hey ya", "hey there", "hello chatbot", "hey man", "wazzup?", "sup?", "yo!", "howdy-doody!", "hey there", "hey mister robot", "hey mr robot", "hello mate", "hey boo", "aloha", "bonjour", "sup robot" )
+GREETING_RESPONSES = ["'sup bro :smile:", "hey :smile:", "*nods*", "hello", "hi", "nice to hear from you", "hello human", "hey human", "Greetings from the smartest chatbot",  ]#this one had to be put into db too.
 def check_for_greeting(sentence): 
 	wordList = re.sub("[^\w]", " ",  sentence).split()
 	for word in wordList:
@@ -34,6 +35,12 @@ def check_for_questions(sentence): #also, this function has to be called from di
 			returnMess = random.choice(QUESTION_RESPONSES)
 		y=y+1
 	return returnMess
+
+def check_for_swears(sentence): 
+	wordList = re.sub("[^\w]", " ",  sentence).split()
+	for word in wordList:
+		if word in SWEAR_KEYWORDS:
+			return True
 
 
 def lowercasing(sentence):
@@ -75,8 +82,8 @@ async def on_message(message):
 		memory.append(message.content)
 		message.content = lowercasing(msg)
 		print(message.content)
-		if message.content.startswith('test'):
-			response = (":scream:")
+		if check_for_swears(message.content):
+			response = random.choice(SWEARING_RESPONSES)
 		elif "movie" in message.content:
 			moviefound = filter_on_movie(message.content)
 			memory.append(moviefound)
@@ -101,6 +108,9 @@ async def on_message(message):
 			movie = mv.search_movie(memory[-3])[0] # a Movie instance.
 			m = mv.get_movie(movie.movieID)
 			response = ("I cant give the " + str(keyword) + " of movie - " + str(m) + " yet. I'm sorry... :weary: ")
+			if keyword == "summary":
+				print("SUMMARISING... ... ...")
+				response = (m.summary())
 		elif message.content in GREETING_KEYWORDS:
 			print("GREETING")
 			response=(check_for_greeting(message.content))
@@ -109,7 +119,9 @@ async def on_message(message):
 			print("QUESTION")
 			message.content.replace("?","")
 			response = (check_for_questions(message.content))
-			print(response)
+		else: 
+			print("IDK")
+			response = ("I have no idea what does that mean... Im a robot u know...")
 		await client.send_message(message.channel, response)
 
 
