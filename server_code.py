@@ -2,6 +2,7 @@ import socket
 import time
 import re
 import random
+import random_questions
 from IMDb import imdb
 from discordx import discord
 import asyncio
@@ -10,9 +11,11 @@ import websockets#Do not edit anything above this unless it is necessary for you
 mv = imdb.IMDb() #imdb connection linking.
 client = discord.Client() #discord api connection linking
 memory = []
-
+stuff = ["", ""]
+choices = [""]
 AGGREE_KEYOWORDS = ('yes','y','yeah')
-FILTERING_KEYWORDS = ('summary','release','date','director')
+DISAGGGREE_KEYWORDS = ('no', 'n', 'nope')
+FILTERING_KEYWORDS = ('title', 'genres', 'director', 'writer', 'cast', 'language', 'country', 'rating', 'plot')
 SWEAR_KEYWORDS = ('fuck', 'stfu', 'idiot', 'noob', 'faggot','bullshit','bs','fck','fcker','fucker','bastard', 'cunt')
 SWEARING_RESPONSES = ["That was not cool...", "Wow, ur such a badass....", "Well, im not used to this kind of language", "Please, dont swear while im on this channel", "Yo, there might be some kids running around", "WOW. Ur such a man. That was a cool word... *sarcasm*"]
 GREETING_KEYWORDS = ("hello",  "hi", "greetings", "sup", "hey", "sup dog", "yo", "hey bro", "hey robot", "good morning", "good afternoon", "good evening", "morning", "hey ya", "hey there", "hello chatbot", "hey man", "wazzup?", "sup?", "yo!", "howdy-doody!", "hey there", "hey mister robot", "hey mr robot", "hello mate", "hey boo", "aloha", "bonjour", "sup robot" )
@@ -26,9 +29,10 @@ def check_for_greeting(sentence):
 			
 QUESTION_KEYWORDS = ('how','are','you','good','alright','hows','it','going','ok')
 QUESTION_RESPONSES = ["I'm good, thanks for asking", "Not so bad", "Pretty good", "So far so good", "Honestly, life is going better that ever", "I've been struggling for a while, but now im good"]
+IDK_RESPONSES = ["I did'nt understood your question, can you please give me a more simple one? Im a workpiece of a first year students. Dont exepect too much from me.","What is that?", "Ok, next question...","IM A ROBOT *beep* *bop* *boop* CANT UNDERSTAND HOOMANS","What language is this? Definately not ROBOTish"]
 def check_for_questions(sentence): #also, this function has to be called from different file(database of all Q/A)
 	wordList = re.sub("[^\w]", " ",  sentence).split()
-	returnMess = ("I did'nt understood your question, can you please give me a more simple one? Im a workpiece of a first year students. Dont exepect too much from me.")
+	returnMess = random.choice(IDK_RESPONSES)
 	y=0
 	while y < len(wordList)-1:
 		if wordList[y] in QUESTION_KEYWORDS and wordList[y+1] in QUESTION_KEYWORDS and wordList[y+1] in QUESTION_KEYWORDS:
@@ -54,6 +58,13 @@ def filter_on_message(message):
 		if word in FILTERING_KEYWORDS:
 			returnMess = word 
 			return returnMess
+def keywording(summarisation, keyword):
+	keywordx = keyword.capitalize()
+	text = summarisation.split('\n')
+	for i in text:
+		if keywordx in i:
+			return i
+
 
 def filter_on_movie(message):
 	lists = re.sub("[^\w]", " ",  message).split()
@@ -66,7 +77,10 @@ def filter_on_movie(message):
 			lists.remove("movie")
 			if "of" in lists:
 				lists.remove("of")
-			return " ".join(lists)
+			if lists == []:
+				return False
+			else:
+				return " ".join(lists)
 @client.event #Discord API connection.
 async def on_ready():
 	print('Logged in as')
@@ -78,39 +92,18 @@ async def on_ready():
 @client.event #Test stuff. This will stay here as an example and debugging.
 async def on_message(message):
 	if not message.author.bot:
+		randomly = None
 		msg = message.content
 		memory.append(message.content)
 		message.content = lowercasing(msg)
-		print(message.content)
-		if check_for_swears(message.content):
+		randomly = random_questions.random_question_filter(message.content)
+		if randomly != None:
+			response = randomly
+		elif message.content == "clear":
+			del memory[:]
+			response = ("Okay, lets start again... Im IMDb ChatBot")
+		elif check_for_swears(message.content) == True:
 			response = random.choice(SWEARING_RESPONSES)
-		elif "movie" in message.content:
-			moviefound = filter_on_movie(message.content)
-			memory.append(moviefound)
-			movie = mv.search_movie(moviefound)[0] # a Movie instance.
-			m = mv.get_movie(movie.movieID)
-			if message.content in FILTERING_KEYWORDS:
-				filteredkeyword = (filter_on_message)
-				response = ("I wish i could give you the " + str(filteredkeyword) + " of the movie " + str(m))
-			else:
-				response = ("Is this the movie you have asked about?" + str(m))
-
-		elif message.content in AGGREE_KEYOWORDS:
-			print("AGGREED")
-			print(str(memory[-2] + "MEMORY LAST"))
-			movie = mv.search_movie(memory[-2])[0] # a Movie instance.
-			m = mv.get_movie(movie.movieID)
-			response = ("What would you want to know about this movie? -" + str(m) + ". Write the thing you want to know only please.")
-		elif message.content in FILTERING_KEYWORDS:
-			print("FILTERING")
-			keyword = filter_on_message(memory[-1])
-			print("MOVIE MEMORY" + str(memory[-3]))
-			movie = mv.search_movie(memory[-3])[0] # a Movie instance.
-			m = mv.get_movie(movie.movieID)
-			response = ("I cant give the " + str(keyword) + " of movie - " + str(m) + " yet. I'm sorry... :weary: ")
-			if keyword == "summary":
-				print("SUMMARISING... ... ...")
-				response = (m.summary())
 		elif message.content in GREETING_KEYWORDS:
 			print("GREETING")
 			response=(check_for_greeting(message.content))
@@ -119,9 +112,74 @@ async def on_message(message):
 			print("QUESTION")
 			message.content.replace("?","")
 			response = (check_for_questions(message.content))
-		else: 
-			print("IDK")
-			response = ("I have no idea what does that mean... Im a robot u know...")
+		elif message.content in AGGREE_KEYOWORDS:
+			print("AGGREED")
+			print(str(memory[-2] + "MEMORY LAST"))
+			movie = mv.search_movie(memory[-2])[0] # a Movie instance.
+			m = mv.get_movie(movie.movieID)
+			print(str(m))
+			response = ("What would you want to know about this movie? -" + str(m) + ". Write the thing you want to know only please."+ '\n' + "Type -choices- to see all available options...")
+		elif message.content in DISAGGGREE_KEYWORDS:
+			print("DISAGGREED")
+			stuff[1] = "What movie?"
+			response = "What movie then? Please, try to type the full title this time. If you want me to forget this movie, type -clear-"	
+		elif choices[0] == "a":
+			choices[0] == ""
+			print("FILTERING")
+			keyword = filter_on_message(message.content)
+			movie = mv.search_movie(memory[-4])[0] # a Movie instance.
+			m = mv.get_movie(movie.movieID)
+			del memory[:]
+			if keyword == "summary":
+				print("SUMMARISING... ... ...")
+				response = (m.summary())
+			else:
+				print(keywording(m.summary(),keyword))
+				response = keywording(m.summary(),keyword)
+		elif message.content == "choices":
+			choices[0] = "a"
+			response = ("Title, Genres, Director, Writer, Cast, Language, Country, Rating, Plot.")
+		elif "movie" in message.content:
+			print("MOVIE")
+			moviefound = filter_on_movie(message.content)
+			if moviefound == False:
+				stuff[0]= "What movie?"
+				response =  "What movie?"
+			else:
+				memory.append(moviefound)
+				movie = mv.search_movie(moviefound)[0] # a Movie instance.
+				m = mv.get_movie(movie.movieID)
+				response =  ("Is this the movie you have asked about?" + str(m))
+		elif stuff[0] == "What movie?":
+			stuff[0] = ""
+			print(message.content)
+			msg = message.content
+			movie = mv.search_movie(message.content)[0]
+			m = mv.get_movie(movie.movieID)
+			response =  ("Is this the movie you have asked about?" + str(m))
+		elif stuff[1] == "What movie?":
+			print("REMOVIE")
+			stuff[1] = ""
+			print(message.content)
+			moviex = mv.search_movie(message.content)[0]
+			mx = mv.get_movie(moviex.movieID)
+			response =  ("Sorry,Is this the movie you have asked about?" + str(mx))
+		elif message.content in FILTERING_KEYWORDS:
+			print("FILTERING")
+			keyword = filter_on_message(memory[-1])
+			print("MOVIE MEMORY" + str(memory[-3]))
+			movie = mv.search_movie(memory[-3])[0] # a Movie instance.
+			m = mv.get_movie(movie.movieID)
+			del memory[:]
+			response = ("I cant give the " + str(keyword) + " of movie - " + str(m) + " yet. I'm sorry... :weary: ")
+			if keyword == "summary":
+				print("SUMMARISING... ... ...")
+				response = (m.summary())
+			else:
+				print(keywording(m.summary(),keyword))
+				response = keywording(m.summary(),keyword)
+		else:
+			response = check_for_questions(message.content)
 		await client.send_message(message.channel, response)
 
 
