@@ -19,7 +19,7 @@ FILTERING_KEYWORDS = ('title', 'genres', 'director', 'writer', 'cast', 'language
 SWEAR_KEYWORDS = ('fuck', 'stfu', 'idiot', 'noob', 'faggot','bullshit','bs','fck','fcker','fucker','bastard', 'cunt','kys')
 SWEARING_RESPONSES = ["That was not cool...", "Wow, ur such a badass....", "Well, im not used to this kind of language", "Please, dont swear while im on this channel", "Yo, there might be some kids running around", "WOW. Ur such a man. That was a cool word... *sarcasm*"]
 GREETING_KEYWORDS = ("hello",  "hi", "greetings", "sup", "hey", "sup dog", "yo", "hey bro", "hey robot", "good morning", "good afternoon", "good evening", "morning", "hey ya", "hey there", "hello chatbot", "hey man", "wazzup?", "sup?", "yo!", "howdy-doody!", "hey there", "hey mister robot", "hey mr robot", "hello mate", "hey boo", "aloha", "bonjour", "sup robot" )
-GREETING_RESPONSES = ["'Sup bro :smile:", "Hey :smile:", "*nods*", "Hello", "Hi", "Nice to hear from you", "Hello human", "Hey human", "Greetings from the smartest chatbot",  ]#this one had to be put into db too.
+GREETING_RESPONSES = ["'Sup bro :smile:", "Hey :smile:", "*Nods*", "Hello", "Hi", "Nice to hear from you", "Hello human", "Hey human", "Greetings from the smartest ChatBot",  ]#this one had to be put into db too.
 def check_for_greeting(sentence): 
 	wordList = re.sub("[^\w]", " ",  sentence).split()
 	for word in wordList:
