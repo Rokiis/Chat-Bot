@@ -20,6 +20,7 @@ def userTeacher():
     while username in usernames and password in passwords:
         login_status = True
         print("Successfully logged in as a " + username)
+        return login_status
         break
     else:
         print("\nWrong password or username ")
