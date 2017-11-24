@@ -9,7 +9,7 @@ def login_menu(): #login function that checks if user is a student or teacher
     elif status == "n":
         userStudent()
     else:
-        login_menu() #else statements ensures that if an invalid character is entered the function will keep looping until right conditon is met
+        login_menu() #ensures that if an invalid character is entered the function will keep looping until right conditon is met
         
 
 def userStudent(): #takes user (student's) name and prints a welcome message
