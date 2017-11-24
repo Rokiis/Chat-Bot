@@ -1,13 +1,15 @@
-usernames = ['teacher','mentor','tutor','technican']
-passwords = ['SecurePassword','password123','safepass','12345']
-status = ""
+usernames = ['teacher','mentor','tutor','technican'] #storing usernames that (in theory) only uni staff has access to
+passwords = ['SecurePassword','password123','safepass','12345'] #storing passwords that (in theory) only uni staff has access to
+status = "" #set status to nill
 
-def login_menu():
+def login_menu(): #
     status = input("Are you a staff member(y/n)? ")
     if status == "y":
         userTeacher()
     elif status == "n":
         userStudent()
+    else:
+        login_menu()
         
 
 def userStudent():
